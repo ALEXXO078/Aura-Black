@@ -103,8 +103,7 @@ function Index() {
             <span className="text-gradient-gold italic">la noche</span>
           </h1>
           <p className="animate-fade-up mt-6 max-w-md text-base leading-relaxed text-muted-foreground">
-            Una colección curada de fragancias premium, importadas y de nicho.
-            Para quienes entienden que un perfume no se elige: se elige a ti.
+            Fragancias seleccionadas para hombres que quieren destacar sin esfuerzo. Aromas sofisticados, seductores y memorables que hablan por ti, despiertan curiosidad y dejan esa sensación de “quiero volver a acercarme”.
           </p>
           <div className="animate-fade-up mt-10 flex flex-wrap gap-4">
             <Link

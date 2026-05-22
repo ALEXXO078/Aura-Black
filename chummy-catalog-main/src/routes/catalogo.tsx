@@ -7,12 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface Search {
   cat?: Category;
+  brand?: string;
   q?: string;
 }
 
 export const Route = createFileRoute("/catalogo")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     cat: (s.cat as Category) || undefined,
+    brand: (s.brand as string) || undefined,
     q: (s.q as string) || undefined,
   }),
   head: () => ({
@@ -25,7 +27,7 @@ export const Route = createFileRoute("/catalogo")({
 });
 
 function Catalogo() {
-  const { cat, q } = Route.useSearch();
+  const { cat, brand, q } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState(q ?? "");
   const [sort, setSort] = useState<"featured" | "asc" | "desc">("featured");
@@ -33,6 +35,15 @@ function Catalogo() {
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [categoriesList, setCategoriesList] = useState<{ id: Category; label: string }[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const brandsList = useMemo(() => {
+    let list = productsList;
+    if (cat) {
+      list = list.filter((p) => p.category === cat);
+    }
+    const brands = list.map((p) => p.brand).filter(Boolean);
+    return Array.from(new Set(brands)).sort();
+  }, [productsList, cat]);
 
   useEffect(() => {
     async function loadData() {
@@ -78,6 +89,7 @@ function Catalogo() {
   const filtered = useMemo(() => {
     let r = productsList;
     if (cat) r = r.filter((p) => p.category === cat);
+    if (brand) r = r.filter((p) => p.brand.toLowerCase() === brand.toLowerCase());
     if (query.trim()) {
       const s = query.toLowerCase();
       r = r.filter(
@@ -90,7 +102,7 @@ function Catalogo() {
     if (sort === "asc") r = [...r].sort((a, b) => a.price - b.price);
     if (sort === "desc") r = [...r].sort((a, b) => b.price - a.price);
     return r;
-  }, [productsList, cat, query, sort]);
+  }, [productsList, cat, brand, query, sort]);
 
   if (loading) {
     return (
@@ -144,6 +156,30 @@ function Catalogo() {
                     className={`text-left transition ${cat === c.id ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     {c.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-xs uppercase tracking-luxury text-gold">Marcas</h3>
+            <ul className="space-y-2 text-sm max-h-[220px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gold/20">
+              <li>
+                <button
+                  onClick={() => navigate({ search: { cat, q: query || undefined } })}
+                  className={`text-left transition ${!brand ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Todas las marcas
+                </button>
+              </li>
+              {brandsList.map((b) => (
+                <li key={b}>
+                  <button
+                    onClick={() => navigate({ search: { cat, brand: b, q: query || undefined } })}
+                    className={`text-left transition ${brand === b ? "text-gold" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    {b}
                   </button>
                 </li>
               ))}
