@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import type { Product, Category } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveImageSrc } from "@/lib/utils";
 
 interface Search {
   cat?: Category;
@@ -66,7 +67,7 @@ function Catalogo() {
             stock: p.stock,
             category: p.categories?.slug || "unisex",
             tags: p.tags || [],
-            image: p.image || ""
+            image: resolveImageSrc(p.image || "")
           }));
           setProductsList(mapped as Product[]);
         }

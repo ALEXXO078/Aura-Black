@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { Product } from "@/data/products";
 import { tagLabels } from "@/data/products";
 import { formatPrice } from "@/lib/config";
+import { resolveImageSrc } from "@/lib/utils";
 
 export function ProductCard({ product }: { product: Product }) {
   const primaryTag = product.tags[0];
@@ -13,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-secondary">
         <img
-          src={product.image}
+          src={resolveImageSrc(product.image)}
           alt={product.name}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"

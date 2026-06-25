@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { ProductCard } from "@/components/ProductCard";
 import { formatPrice, whatsappLink } from "@/lib/config";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveImageSrc } from "@/lib/utils";
 
 export const Route = createFileRoute("/producto/$slug")({
   loader: async ({ params }) => {
@@ -30,16 +31,22 @@ export const Route = createFileRoute("/producto/$slug")({
       stock: p.stock,
       category: p.categories?.slug || "unisex",
       tags: p.tags || [],
-      image: p.image || "",
+      image: resolveImageSrc(p.image || ""),
     };
 
     // Fetch related products (same category)
-    const { data: relatedData } = await supabase
-      .from("products")
-      .select("*, categories(slug)")
-      .eq("category_id", p.category_id)
-      .neq("id", p.id)
-      .limit(3);
+    let relatedData: any[] = [];
+
+    if (p.category_id) {
+      const { data } = await supabase
+        .from("products")
+        .select("*, categories(slug)")
+        .eq("category_id", p.category_id)
+        .neq("id", p.id)
+        .limit(3);
+
+      relatedData = data || [];
+    }
 
     const related = (relatedData || []).map((rp: any) => ({
       id: rp.id,
@@ -54,7 +61,7 @@ export const Route = createFileRoute("/producto/$slug")({
       stock: rp.stock,
       category: rp.categories?.slug || "unisex",
       tags: rp.tags || [],
-      image: rp.image || "",
+      image: resolveImageSrc(rp.image || ""),
     }));
 
     return { product, related };
@@ -66,7 +73,7 @@ export const Route = createFileRoute("/producto/$slug")({
           { name: "description", content: loaderData.product.description },
           { property: "og:title", content: `${loaderData.product.name} — Aura Black` },
           { property: "og:description", content: loaderData.product.description },
-          { property: "og:image", content: loaderData.product.image },
+          { property: "og:image", content: resolveImageSrc(loaderData.product.image) },
         ]
       : [],
   }),
@@ -103,7 +110,7 @@ function ProductPage() {
 
       <div className="mt-8 grid gap-12 lg:grid-cols-2">
         <div className="relative overflow-hidden rounded-sm bg-secondary">
-          <img src={product.image} alt={product.name} className="aspect-[4/5] w-full object-cover" />
+          <img src={resolveImageSrc(product.image)} alt={product.name} className="aspect-[4/5] w-full object-cover" />
           {product.tags[0] && (
             <span className="absolute left-6 top-6 rounded-sm border border-gold/40 bg-background/70 px-3 py-1 text-[10px] uppercase tracking-luxury text-gold backdrop-blur">
               {tagLabels[product.tags[0]]}

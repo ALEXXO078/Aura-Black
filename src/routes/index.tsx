@@ -5,6 +5,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/data/products";
+import { resolveImageSrc } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,7 +43,7 @@ function Index() {
             stock: p.stock,
             category: p.categories?.slug || "unisex",
             tags: p.tags || [],
-            image: p.image || ""
+            image: resolveImageSrc(p.image || "")
           }));
           setProductsList(mapped as Product[]);
         }
